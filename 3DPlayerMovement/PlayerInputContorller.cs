@@ -29,6 +29,11 @@ public class PlayerInputContorller: MonoBehaviour
             playerActionsController.TryJump();
     }
 
+    void OnCrouch(InputValue value)
+    {
+        playerActionsController.crouchInput = value.isPressed;
+    }
+
     void Start()
     {
         Cursor.visible = false;

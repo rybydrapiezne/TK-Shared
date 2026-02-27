@@ -16,13 +16,39 @@ public class PlayerActionsController : MonoBehaviour
     [SerializeField] float walkSpeed = 4f;
     [Tooltip("The speed of character sprinting")]
     [SerializeField] float sprintSpeed = 6f;
-    float MaxMoveSpeed => sprintInput? sprintSpeed:walkSpeed;
+    [Tooltip("The speed of character when crouched")]
+    [SerializeField] float crouchedSpeed = 2f;
+    float MaxMoveSpeed
+    {
+        get
+        {
+            if (crouchInput)
+            {
+                return crouchedSpeed;
+            }
+            else if (sprintInput)
+            {
+                return sprintSpeed;
+            }
+            else
+            {
+                return walkSpeed;
+            }
+        }
+    }
+    [Space(10)] 
+    [Tooltip("The height of player when crouched")]
+    [SerializeField] float crouchHeight = 1.5f;
+    float normalHeight = 2f; // Updated to characterController.height on awake
+    [Tooltip("The layers to check for to avoid uncrouching into ceiling")]
+    [SerializeField] LayerMask uncrouchCeilingLayer;
     [Space(10)] 
     [Tooltip("The height character will jump")]
     [SerializeField] float jumpHeight = 2f;
 
 
     bool IsSprinting => sprintInput && _currentSpeed > 0.1f;
+    bool isCrouching;
 
     [Header("Camera Parameters")]
     [Tooltip("Sensitivity of mouse applied to camera movement")]
@@ -41,6 +67,8 @@ public class PlayerActionsController : MonoBehaviour
     [SerializeField] float pitchLimit = 85f;
     
     float _currentPitch = 0f;
+    float originalCameraPosY;
+    [SerializeField] Transform CameraTarget;
    
 
     [Header("Input")] 
@@ -50,6 +78,8 @@ public class PlayerActionsController : MonoBehaviour
     public Vector2 lookInput;
     [HideInInspector]
     public bool sprintInput;
+    [HideInInspector]
+    public bool crouchInput;
 
     [Header("Physics Parameters")] 
     [Tooltip("Scale of the gravity applied to the character")]
@@ -59,7 +89,14 @@ public class PlayerActionsController : MonoBehaviour
     float _currentSpeed;
     Vector3 _currentVelocity;
     bool IsGrounded => characterController.isGrounded;
+    bool IsCeilingAboveHead => Physics.CheckSphere(transform.position + new Vector3(0, 0.5f, 0), characterController.radius, uncrouchCeilingLayer);
     float CurrentPitch { get => _currentPitch; set => _currentPitch = Mathf.Clamp(value, -pitchLimit, pitchLimit);}
+
+    void Awake()
+    {
+        normalHeight = characterController.height;
+        originalCameraPosY = CameraTarget.localPosition.y;
+    }
 
     void Update()
     {
@@ -78,7 +115,26 @@ public class PlayerActionsController : MonoBehaviour
     void CameraUpdate()
     {
         var targetFOV = cameraNormalFOV;
-        if (IsSprinting)
+
+        float targetCameraY = isCrouching ? originalCameraPosY - normalHeight + crouchHeight : originalCameraPosY;
+        
+        Vector3 newCameraPos = CameraTarget.localPosition;
+        newCameraPos.y = Mathf.Lerp(CameraTarget.localPosition.y, targetCameraY, 6 * Time.deltaTime);
+        CameraTarget.localPosition = newCameraPos;
+        
+        if (crouchInput)
+        {
+            isCrouching = true;
+            characterController.height = crouchHeight;
+            characterController.center = new Vector3(0, -(normalHeight-crouchHeight)/2f, 0);
+        } else if (!IsCeilingAboveHead)
+        {
+            isCrouching = false;
+            characterController.height = normalHeight;
+            characterController.center = Vector3.zero;
+        }
+
+        if (IsSprinting && !isCrouching)
         {
             var speedRatio = _currentSpeed / sprintSpeed;
             targetFOV = Mathf.Lerp(cameraNormalFOV,cameraSprintFOV,speedRatio);
