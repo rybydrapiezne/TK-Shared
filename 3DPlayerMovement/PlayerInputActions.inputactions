@@ -35,9 +35,9 @@
                 },
                 {
                     "name": "Crouch",
-                    "type": "Button",
+                    "type": "PassThrough",
                     "id": "358afe6a-d297-4251-9706-2159ad970810",
-                    "expectedControlType": "",
+                    "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
