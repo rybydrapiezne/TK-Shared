@@ -22,7 +22,7 @@ public class PlayerActionsController : MonoBehaviour
     {
         get
         {
-            if (crouchInput)
+            if (isCrouching)
             {
                 return crouchedSpeed;
             }
@@ -48,7 +48,7 @@ public class PlayerActionsController : MonoBehaviour
 
 
     bool IsSprinting => sprintInput && _currentSpeed > 0.1f;
-    bool isCrouching;
+    bool isCrouching = false;
 
     [Header("Camera Parameters")]
     [Tooltip("Sensitivity of mouse applied to camera movement")]
