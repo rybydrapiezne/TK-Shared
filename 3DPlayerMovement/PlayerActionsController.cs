@@ -1,14 +1,16 @@
+using TK_Shared._3DPlayerMovement;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
-[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(CharacterController),typeof(HeadBobbing))]
 public class PlayerActionsController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] CharacterController characterController;
     [SerializeField] CinemachineCamera playerCamera;
+    [SerializeField] HeadBobbing headBobbing;
 
     [Header("Movement Parameters")] 
     [SerializeField] float acceleration = 15f;
@@ -18,6 +20,10 @@ public class PlayerActionsController : MonoBehaviour
     [SerializeField] float sprintSpeed = 6f;
     [Tooltip("The speed of character when crouched")]
     [SerializeField] float crouchedSpeed = 2f;
+    [Tooltip("Base frequency of head bobbing movement")]
+    [SerializeField, Range(0, 30)] float baseHeadBobbingFreq = 10f;
+    [Tooltip("Base amplitude of head bobbing movement")]
+    [SerializeField, Range(0, 0.01f)] float baseHeadBobbingAmpl = 0.002f;
     float MaxMoveSpeed
     {
         get
@@ -137,7 +143,14 @@ public class PlayerActionsController : MonoBehaviour
         if (IsSprinting && !isCrouching)
         {
             var speedRatio = _currentSpeed / sprintSpeed;
+            headBobbing.frequency = baseHeadBobbingFreq * 2;
+            headBobbing.amplitude = baseHeadBobbingAmpl * 2;
             targetFOV = Mathf.Lerp(cameraNormalFOV,cameraSprintFOV,speedRatio);
+        }
+        else if (!IsSprinting)
+        {
+            headBobbing.frequency = baseHeadBobbingFreq;
+            headBobbing.amplitude = baseHeadBobbingAmpl;
         }
         playerCamera.Lens.FieldOfView = Mathf.Lerp(playerCamera.Lens.FieldOfView, targetFOV,cameraFOVSmoothing * Time.deltaTime);
     }
