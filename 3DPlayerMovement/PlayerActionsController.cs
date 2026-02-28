@@ -24,6 +24,8 @@ public class PlayerActionsController : MonoBehaviour
     [SerializeField, Range(0, 30)] float baseHeadBobbingFreq = 10f;
     [Tooltip("Base amplitude of head bobbing movement")]
     [SerializeField, Range(0, 0.01f)] float baseHeadBobbingAmpl = 0.002f;
+    [Tooltip("Crouch toggle")]
+    [SerializeField] bool crouchToggle;
     float MaxMoveSpeed
     {
         get
@@ -91,6 +93,8 @@ public class PlayerActionsController : MonoBehaviour
     [Tooltip("Scale of the gravity applied to the character")]
     [SerializeField] float gravityScale = 3f;
 
+
+    bool _previousCrouchInputState = false;
     float _verticalVelocity = 0f;
     float _currentSpeed;
     Vector3 _currentVelocity;
@@ -127,19 +131,41 @@ public class PlayerActionsController : MonoBehaviour
         Vector3 newCameraPos = CameraTarget.localPosition;
         newCameraPos.y = Mathf.Lerp(CameraTarget.localPosition.y, targetCameraY, 6 * Time.deltaTime);
         CameraTarget.localPosition = newCameraPos;
-        
-        if (crouchInput)
+
+        if (!crouchToggle)
         {
-            isCrouching = true;
+            if (crouchInput)
+            {
+                isCrouching = true;
+            }
+            else if (!IsCeilingAboveHead)
+            {
+                isCrouching = false;
+            }
+        }
+        else
+        {
+            if (crouchInput && !_previousCrouchInputState)
+            {
+                isCrouching = !isCrouching;
+                
+                if (!isCrouching && IsCeilingAboveHead)
+                {
+                    isCrouching = true;
+                }
+            }
+        }
+        if (isCrouching)
+        {
             characterController.height = crouchHeight;
-            characterController.center = new Vector3(0, -(normalHeight-crouchHeight)/2f, 0);
-        } else if (!IsCeilingAboveHead)
+            characterController.center = new Vector3(0, -(normalHeight - crouchHeight) / 2f, 0);
+        }
+        else if (!IsCeilingAboveHead)
         {
-            isCrouching = false;
             characterController.height = normalHeight;
             characterController.center = Vector3.zero;
         }
-
+        _previousCrouchInputState = crouchInput;
         if (IsSprinting && !isCrouching)
         {
             var speedRatio = _currentSpeed / sprintSpeed;
