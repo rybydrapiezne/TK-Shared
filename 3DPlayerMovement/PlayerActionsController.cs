@@ -98,6 +98,7 @@ public class PlayerActionsController : MonoBehaviour
     float _verticalVelocity = 0f;
     float _currentSpeed;
     Vector3 _currentVelocity;
+    Vector3 _centerOrigin;
     bool IsGrounded => characterController.isGrounded;
     bool IsCeilingAboveHead => Physics.CheckSphere(transform.position + new Vector3(0, 0.5f, 0), characterController.radius, uncrouchCeilingLayer);
     float CurrentPitch { get => _currentPitch; set => _currentPitch = Mathf.Clamp(value, -pitchLimit, pitchLimit);}
@@ -105,6 +106,7 @@ public class PlayerActionsController : MonoBehaviour
     void Awake()
     {
         normalHeight = characterController.height;
+        _centerOrigin = characterController.center;
         originalCameraPosY = CameraTarget.localPosition.y;
     }
 
@@ -158,12 +160,12 @@ public class PlayerActionsController : MonoBehaviour
         if (isCrouching)
         {
             characterController.height = crouchHeight;
-            characterController.center = new Vector3(0, -(normalHeight - crouchHeight) / 2f, 0);
+            characterController.center = _centerOrigin + new Vector3(0, -(normalHeight - crouchHeight) / 2f, 0);
         }
         else if (!IsCeilingAboveHead)
         {
             characterController.height = normalHeight;
-            characterController.center = Vector3.zero;
+            characterController.center = _centerOrigin;
         }
         _previousCrouchInputState = crouchInput;
         if (IsSprinting && !isCrouching)
