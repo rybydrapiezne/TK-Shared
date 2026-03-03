@@ -1,42 +1,49 @@
-using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(PlayerActionsController))]
-public class PlayerInputContorller: MonoBehaviour
+namespace TK_Shared._3DPlayerMovement
 {
-    [Header("References")]
-    [SerializeField] PlayerActionsController playerActionsController;
-
-    void OnMove(InputValue value)
+    [RequireComponent(typeof(PlayerActionsController))]
+    public class PlayerInputContorller: MonoBehaviour
     {
-        playerActionsController.moveInput = value.Get<Vector2>();
-    }
+        [Header("References")]
+        [SerializeField] PlayerActionsController playerActionsController;
 
-    void OnLook(InputValue value)
-    {
-        playerActionsController.lookInput = value.Get<Vector2>();
-    }
+        void OnMove(InputValue value)
+        {
+            playerActionsController.moveInput = value.Get<Vector2>();
+        }
 
-    void OnSprint(InputValue value)
-    {
-        playerActionsController.sprintInput = value.isPressed;
-    }
+        void OnLook(InputValue value)
+        {
+            playerActionsController.lookInput = value.Get<Vector2>();
+        }
 
-    void OnJump(InputValue value)
-    {
-        if(value.isPressed)
-            playerActionsController.TryJump();
-    }
+        void OnSprint(InputValue value)
+        {
+            playerActionsController.sprintInput = value.isPressed;
+        }
 
-    void OnCrouch(InputValue value)
-    {
-        playerActionsController.crouchInput = value.isPressed;
-    }
+        void OnJump(InputValue value)
+        {
+            if(value.isPressed)
+                playerActionsController.TryJump();
+        }
 
-    void Start()
-    {
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        void OnCrouch(InputValue value)
+        {
+            playerActionsController.crouchInput = value.isPressed;
+        }
+        void OnInteract(InputValue value)
+        {
+            if (value.isPressed)
+                playerActionsController.PickUp();
+        }
+
+        void Start()
+        {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
     }
 }
