@@ -77,6 +77,7 @@ public class PlayerActionsController : MonoBehaviour
     float _currentPitch = 0f;
     float originalCameraPosY;
     [SerializeField] Transform CameraTarget;
+    [HideInInspector] public float eyeLevel => CameraTarget.transform.localPosition.y;
    
 
     [Header("Input")] 
