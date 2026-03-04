@@ -100,7 +100,7 @@ public class PlayerActionsController : MonoBehaviour
     Vector3 _currentVelocity;
     Vector3 _centerOrigin;
     bool IsGrounded => characterController.isGrounded;
-    bool IsCeilingAboveHead => Physics.CheckSphere(transform.position + new Vector3(0, 0.5f, 0), characterController.radius, uncrouchCeilingLayer);
+    bool IsCeilingAboveHead => Physics.CheckSphere(transform.position + _centerOrigin + new Vector3(0, 0.5f, 0), characterController.radius, uncrouchCeilingLayer);
     float CurrentPitch { get => _currentPitch; set => _currentPitch = Mathf.Clamp(value, -pitchLimit, pitchLimit);}
 
     void Awake()
