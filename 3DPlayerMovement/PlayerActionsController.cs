@@ -90,7 +90,7 @@ namespace TK_Shared._3DPlayerMovement
         float _currentPitch = 0f;
         float originalCameraPosY;
         [SerializeField] Transform CameraTarget;
-
+        [HideInInspector] public float eyeLevel => CameraTarget.transform.localPosition.y;
         [Header("Interaction Parameters")] 
         [SerializeField] float pickupRange = 2f;
         [SerializeField] LayerMask pickupLayer;
@@ -106,14 +106,16 @@ namespace TK_Shared._3DPlayerMovement
         float _verticalVelocity = 0f;
         float _currentSpeed;
         Vector3 _currentVelocity;
+        Vector3 _centerOrigin;
         bool IsGrounded => characterController.isGrounded;
-        bool IsCeilingAboveHead => Physics.CheckSphere(transform.position + new Vector3(0, 0.5f, 0), characterController.radius, uncrouchCeilingLayer);
+        bool IsCeilingAboveHead => Physics.CheckSphere(transform.position + _centerOrigin + new Vector3(0, 0.5f, 0), characterController.radius, uncrouchCeilingLayer);
         float CurrentPitch { get => _currentPitch; set => _currentPitch = Mathf.Clamp(value, -pitchLimit, pitchLimit);}
 
         void Awake()
         {
             normalHeight = characterController.height;
             originalCameraPosY = CameraTarget.localPosition.y;
+            _centerOrigin = characterController.center;
             _cameraTransform = playerCamera.transform;
         }
         void Update()
@@ -183,12 +185,12 @@ namespace TK_Shared._3DPlayerMovement
             if (isCrouching)
             {
                 characterController.height = crouchHeight;
-                characterController.center = new Vector3(0, -(normalHeight - crouchHeight) / 2f, 0);
+                characterController.center = _centerOrigin + new Vector3(0, -(normalHeight - crouchHeight) / 2f, 0);
             }
             else if (!IsCeilingAboveHead)
             {
                 characterController.height = normalHeight;
-                characterController.center = Vector3.zero;
+                characterController.center = _centerOrigin;                
             }
             _previousCrouchInputState = crouchInput;
             if (IsSprinting && !isCrouching)
