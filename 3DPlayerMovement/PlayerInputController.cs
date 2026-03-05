@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 namespace TK_Shared._3DPlayerMovement
 {
     [RequireComponent(typeof(PlayerActionsController))]
-    public class PlayerInputContorller: MonoBehaviour
+    public class PlayerInputController: MonoBehaviour
     {
         [Header("References")]
         [SerializeField] PlayerActionsController playerActionsController;
