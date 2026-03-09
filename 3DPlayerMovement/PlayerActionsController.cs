@@ -6,7 +6,7 @@ using UnityEngine;
 namespace TK_Shared._3DPlayerMovement
 {
     [RequireComponent(typeof(CharacterController),typeof(HeadBobbing))]
-    public class PlayerActionsController : MonoBehaviour
+    public class PlayerActionsController : MonoBehaviour, ICharacter
     {
         [HideInInspector]
         public Transform pickedUpObject=null;
@@ -94,7 +94,8 @@ namespace TK_Shared._3DPlayerMovement
         [Header("Interaction Parameters")] 
         [SerializeField] float pickupRange = 2f;
         [SerializeField] LayerMask pickupLayer;
-
+        [SerializeField] float maxHealth = 100;
+        
 
         [Header("Physics Parameters")] 
         [Tooltip("Scale of the gravity applied to the character")]
@@ -104,6 +105,7 @@ namespace TK_Shared._3DPlayerMovement
         GrabbableObject _grabbedObject;
         bool _previousCrouchInputState = false;
         float _verticalVelocity = 0f;
+        float health;
         float _currentSpeed;
         Vector3 _currentVelocity;
         Vector3 _centerOrigin;
@@ -117,6 +119,7 @@ namespace TK_Shared._3DPlayerMovement
             originalCameraPosY = CameraTarget.localPosition.y;
             _centerOrigin = characterController.center;
             _cameraTransform = playerCamera.transform;
+            health = maxHealth;
         }
         void Update()
         {
@@ -241,7 +244,22 @@ namespace TK_Shared._3DPlayerMovement
             characterController.Move(fullVelocity * Time.deltaTime);
             _currentSpeed = _currentVelocity.magnitude;
         }
-        
 
+
+        public void Damage(float damage)
+        {
+            Debug.Log("GOT HIT PLAYER");
+
+            health = Mathf.Clamp(health - damage, 0,maxHealth);
+
+            if (health <= 0)
+            {
+                Die();
+            }
+        }
+
+        public void Die()
+        {
+        }
     }
 }
