@@ -6,7 +6,7 @@ using UnityEngine;
 namespace TK_Shared._3DPlayerMovement
 {
     [RequireComponent(typeof(CharacterController),typeof(HeadBobbing))]
-    public class PlayerActionsController : MonoBehaviour, ICharacter
+    public class PlayerActionsController : MonoBehaviour
     {
         [HideInInspector]
         public Transform pickedUpObject=null;
