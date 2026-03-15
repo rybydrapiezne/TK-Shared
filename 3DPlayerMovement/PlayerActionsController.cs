@@ -141,8 +141,6 @@ namespace TK_Shared._3DPlayerMovement
             {
                 if (hit.transform.TryGetComponent(out GrabbableObject grabbable))
                 {
-                    if (pickedUpObject != null)
-                        _grabbedObject.Drop();
                     pickedUpObject = grabbable.transform;
                     _grabbedObject = grabbable;
                     grabbable.Grab(HoldPivot);
