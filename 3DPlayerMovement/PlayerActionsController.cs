@@ -112,6 +112,7 @@ namespace TK_Shared._3DPlayerMovement
         bool IsGrounded => characterController.isGrounded;
         bool IsCeilingAboveHead => Physics.CheckSphere(transform.position + _centerOrigin + new Vector3(0, 0.5f, 0), characterController.radius, uncrouchCeilingLayer);
         float CurrentPitch { get => _currentPitch; set => _currentPitch = Mathf.Clamp(value, -pitchLimit, pitchLimit);}
+        public static float Speed { get; private set; }
 
         void Awake()
         {
@@ -241,6 +242,7 @@ namespace TK_Shared._3DPlayerMovement
 
             characterController.Move(fullVelocity * Time.deltaTime);
             _currentSpeed = _currentVelocity.magnitude;
+            Speed = _currentSpeed;
         }
 
 
