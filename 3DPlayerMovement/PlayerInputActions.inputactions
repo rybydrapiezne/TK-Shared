@@ -115,6 +115,7 @@
                     "initialStateCheck": false
                 },
                 {
+
                     "name": "LeanLeft",
                     "type": "PassThrough",
                     "id": "b1949837-22b1-47e2-85c7-2c3dd6e1a2dd",
@@ -127,6 +128,15 @@
                     "name": "LeanRight",
                     "type": "PassThrough",
                     "id": "022546b5-0ee5-4401-8c27-bf21dc431352",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Melee",
+                    "type": "PassThrough",
+                    "id": "7c4048f1-072a-4f4f-8f70-4ad81c2a3ab2",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -329,6 +339,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "LeanRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "774eea5d-f67c-4fc0-87d7-9b17e1ed465f",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Melee",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
