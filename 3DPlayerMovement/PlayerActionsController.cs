@@ -7,7 +7,8 @@ namespace TK_Shared._3DPlayerMovement
 {
     [RequireComponent(typeof(CharacterController),typeof(HeadBobbing))]
     public class PlayerActionsController : MonoBehaviour
-    {
+    {        
+        public static float Speed { get; private set; }
         [HideInInspector]
         public Transform pickedUpObject=null;
         [HideInInspector]
@@ -39,6 +40,10 @@ namespace TK_Shared._3DPlayerMovement
         [SerializeField, Range(0, 0.01f)] float baseHeadBobbingAmpl = 0.002f;
         [Tooltip("Crouch toggle")]
         [SerializeField] bool crouchToggle;
+        [Header("Lean Parameters")]
+        [SerializeField] float leanAngle = 15f;
+        [SerializeField] float leanHorizontalOffset = 0.3f;
+        [SerializeField] float leanSpeed = 8f;
         float MaxMoveSpeed
         {
             get
@@ -112,7 +117,9 @@ namespace TK_Shared._3DPlayerMovement
         bool IsGrounded => characterController.isGrounded;
         bool IsCeilingAboveHead => Physics.CheckSphere(transform.position + _centerOrigin + new Vector3(0, 0.5f, 0), characterController.radius, uncrouchCeilingLayer);
         float CurrentPitch { get => _currentPitch; set => _currentPitch = Mathf.Clamp(value, -pitchLimit, pitchLimit);}
-        public static float Speed { get; private set; }
+        float _targetLeanAngle = 0f;
+        float _currentLeanAngle = 0f;
+        int _lastLeanDirection = 0;
 
         void Awake()
         {
@@ -128,7 +135,13 @@ namespace TK_Shared._3DPlayerMovement
             LookUpdate();
             CameraUpdate();
         }
-
+        public void TryLean(int direction)
+        {
+            if (direction == _lastLeanDirection)
+                direction = 0;
+            _lastLeanDirection = direction;
+            _targetLeanAngle = direction * leanAngle;
+        }
         public void TryJump()
         {
             if(!IsGrounded)
@@ -138,7 +151,7 @@ namespace TK_Shared._3DPlayerMovement
         }
         public void PickUp()
         {
-            if (Physics.Raycast(_cameraTransform.position, _cameraTransform.forward, out RaycastHit hit, pickupLayer))
+            if (Physics.Raycast(_cameraTransform.position, _cameraTransform.forward, out RaycastHit hit,pickupRange,pickupLayer))
             {
                 if (hit.transform.TryGetComponent(out GrabbableObject grabbable))
                 {
@@ -214,10 +227,13 @@ namespace TK_Shared._3DPlayerMovement
         {
             Vector2 input = new Vector2(lookInput.x * lookSensitivity.x, lookInput.y * lookSensitivity.y);
             CurrentPitch -= input.y;
-        
+
             playerCamera.transform.localRotation = Quaternion.Euler(_currentPitch, 0, 0);
-        
-            transform.Rotate(Vector3.up*input.x);
+
+            _currentLeanAngle = Mathf.Lerp(_currentLeanAngle, _targetLeanAngle, leanSpeed * Time.deltaTime);
+            transform.localRotation = Quaternion.Euler(0, transform.localEulerAngles.y, -_currentLeanAngle);
+
+            transform.Rotate(Vector3.up * input.x);
         }
 
         void MoveUpdate()
@@ -244,7 +260,7 @@ namespace TK_Shared._3DPlayerMovement
             _currentSpeed = _currentVelocity.magnitude;
             Speed = _currentSpeed;
         }
-
+        
 
         public void Damage(float damage)
         {

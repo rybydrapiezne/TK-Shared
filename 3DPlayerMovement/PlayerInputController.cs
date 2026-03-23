@@ -39,7 +39,17 @@ namespace TK_Shared._3DPlayerMovement
             if (value.isPressed)
                 playerActionsController.PickUp();
         }
+        void OnLeanRight(InputValue value)
+        {
+            if (value.isPressed)
+                playerActionsController.TryLean(1);
 
+        }
+        void OnLeanLeft(InputValue value)
+        {
+            if (value.isPressed)
+                playerActionsController.TryLean(-1);
+        }
         void Start()
         {
             Cursor.visible = false;
