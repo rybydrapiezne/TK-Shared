@@ -115,7 +115,6 @@
                     "initialStateCheck": false
                 },
                 {
-
                     "name": "LeanLeft",
                     "type": "PassThrough",
                     "id": "b1949837-22b1-47e2-85c7-2c3dd6e1a2dd",
@@ -137,6 +136,15 @@
                     "name": "Melee",
                     "type": "PassThrough",
                     "id": "7c4048f1-072a-4f4f-8f70-4ad81c2a3ab2",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Zoom",
+                    "type": "PassThrough",
+                    "id": "679efc95-a470-4a9b-8fe4-a60bdc5a794b",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -350,6 +358,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Melee",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "552e9f72-a162-4434-8f31-f7f290df5b46",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Zoom",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
