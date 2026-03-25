@@ -44,6 +44,13 @@ namespace TK_Shared._3DPlayerMovement
         [SerializeField] float leanAngle = 15f;
         [SerializeField] float leanHorizontalOffset = 0.3f;
         [SerializeField] float leanSpeed = 8f;
+        [Header("Slide Settings")]
+        [Tooltip("How fast the player slides off the enemy.")]
+        [SerializeField] float slideSpeed = 8f;
+        [SerializeField] string enemyLayerName = "Enemy";
+        int enemyLayerIndex;
+        Vector3 slideVelocity;
+        
         float MaxMoveSpeed
         {
             get
@@ -128,6 +135,7 @@ namespace TK_Shared._3DPlayerMovement
             _centerOrigin = characterController.center;
             _cameraTransform = playerCamera.transform;
             health = maxHealth;
+            enemyLayerIndex = LayerMask.NameToLayer("Enemy");
         }
         void Update()
         {
@@ -254,13 +262,39 @@ namespace TK_Shared._3DPlayerMovement
                 _verticalVelocity += Physics.gravity.y * gravityScale * Time.deltaTime;
 
             }
-            Vector3 fullVelocity = new(_currentVelocity.x, _verticalVelocity, _currentVelocity.z);
+            Vector3 fullVelocity = new Vector3(_currentVelocity.x, _verticalVelocity, _currentVelocity.z) + slideVelocity;
 
             characterController.Move(fullVelocity * Time.deltaTime);
+            slideVelocity = Vector3.Lerp(slideVelocity, Vector3.zero, Time.deltaTime * 10f);
             _currentSpeed = _currentVelocity.magnitude;
             Speed = _currentSpeed;
         }
         
+        void OnControllerColliderHit(ControllerColliderHit hit)
+        {
+            if (hit.gameObject.layer == enemyLayerIndex)
+            {
+                // 2. Check the "normal" of the hit. 
+                // The normal is the direction the surface is pointing. 
+                // If y > 0.5, the surface is pointing mostly upwards, meaning we are on top of it.
+                if (hit.normal.y > 0.5f)
+                {
+                    // 3. Calculate a push direction based on the slope of the enemy's head.
+                    // We ignore the Y axis so we strictly push the player horizontally.
+                    Vector3 pushDirection = new Vector3(hit.normal.x, 0f, hit.normal.z).normalized;
+
+                    // Edge Case: If the player lands perfectly dead-center on top, the horizontal normal is zero.
+                    // We assign a random nudge so they don't get stuck balancing permanently.
+                    if (pushDirection == Vector3.zero)
+                    {
+                        pushDirection = new Vector3(UnityEngine.Random.Range(-1f, 1f), 0f, UnityEngine.Random.Range(-1f, 1f)).normalized;
+                    }
+
+                    // 4. Set the slide velocity
+                    slideVelocity = pushDirection * slideSpeed;
+                }
+            }
+        }
 
         public void Damage(float damage)
         {
