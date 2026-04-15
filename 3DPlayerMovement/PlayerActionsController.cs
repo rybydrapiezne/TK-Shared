@@ -139,6 +139,7 @@ namespace TK_Shared._3DPlayerMovement
         }
         void Update()
         {
+            if (Time.timeScale == 0f) return;
             MoveUpdate();
             LookUpdate();
             CameraUpdate();
