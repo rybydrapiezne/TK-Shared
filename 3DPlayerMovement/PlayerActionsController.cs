@@ -1,4 +1,5 @@
 using System;
+using OptionsSystem;
 using TK_Shared.ObjectInteractions3D;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -38,8 +39,6 @@ namespace TK_Shared._3DPlayerMovement
         [SerializeField, Range(0, 30)] float baseHeadBobbingFreq = 10f;
         [Tooltip("Base amplitude of head bobbing movement")]
         [SerializeField, Range(0, 0.01f)] float baseHeadBobbingAmpl = 0.002f;
-        [Tooltip("Crouch toggle")]
-        [SerializeField] bool crouchToggle;
         [Header("Lean Parameters")]
         [SerializeField] float leanAngle = 15f;
         [SerializeField] float leanHorizontalOffset = 0.3f;
@@ -146,6 +145,7 @@ namespace TK_Shared._3DPlayerMovement
         }
         public void TryLean(int direction)
         {
+            // TODO: implement hold option, reading Options.IsLeanHold
             if (direction == _lastLeanDirection)
                 direction = 0;
             _lastLeanDirection = direction;
@@ -182,8 +182,8 @@ namespace TK_Shared._3DPlayerMovement
             Vector3 newCameraPos = CameraTarget.localPosition;
             newCameraPos.y = Mathf.Lerp(CameraTarget.localPosition.y, targetCameraY, 6 * Time.deltaTime);
             CameraTarget.localPosition = newCameraPos;
-
-            if (!crouchToggle)
+            
+            if (Options.IsCrouchHold)
             {
                 if (crouchInput)
                 {
