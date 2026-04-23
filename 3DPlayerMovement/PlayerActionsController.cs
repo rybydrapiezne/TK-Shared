@@ -9,6 +9,8 @@ using Random = UnityEngine.Random;
 
 namespace TK_Shared._3DPlayerMovement
 {
+    enum AudioEmitType { Move, Jump, Fall }
+    
     [RequireComponent(typeof(CharacterController), typeof(HeadBobbing))]
     public class PlayerActionsController : MonoBehaviour
     {
@@ -48,8 +50,8 @@ namespace TK_Shared._3DPlayerMovement
         [Header("Audio settings")] [SerializeField]
         AudioSource walkingAudioSource;
 
-        [Space(10)] [SerializeField] float audioEmitRadius = 10f;
-        [SerializeField] float crouchVolume = 0.1f;
+        [SerializeField] float audioEmitRadius = 10f;
+        [Space(10)] [SerializeField] float crouchVolume = 0.1f;
         [SerializeField] float walkVolume = 1f;
         [SerializeField] float sprintVolume = 1.5f;
 
@@ -126,7 +128,6 @@ namespace TK_Shared._3DPlayerMovement
         float pickupRange = 2f;
 
         [SerializeField] LayerMask pickupLayer;
-        [SerializeField] float maxHealth = 100;
 
 
         [Header("Physics Parameters")] [Tooltip("Scale of the gravity applied to the character")] [SerializeField]
@@ -136,11 +137,11 @@ namespace TK_Shared._3DPlayerMovement
         GrabbableObject _grabbedObject;
         bool _previousCrouchInputState = false;
         float _verticalVelocity = 0f;
-        float health;
         float _currentSpeed;
         Vector3 _currentVelocity;
         Vector3 _centerOrigin;
         bool IsGrounded => characterController.isGrounded;
+        float _airTime;
 
         bool IsCeilingAboveHead => Physics.CheckSphere(transform.position + _centerOrigin + new Vector3(0, 0.5f, 0),
             characterController.radius, uncrouchCeilingLayer);
@@ -161,7 +162,6 @@ namespace TK_Shared._3DPlayerMovement
             originalCameraPosY = CameraTarget.localPosition.y;
             _centerOrigin = characterController.center;
             _cameraTransform = playerCamera.transform;
-            health = maxHealth;
             enemyLayerIndex = LayerMask.NameToLayer("Enemy");
         }
 
@@ -172,6 +172,14 @@ namespace TK_Shared._3DPlayerMovement
             LookUpdate();
             CameraUpdate();
             AudioUpdate();
+            if (_airTime > 0.1f && IsGrounded)
+            {
+                AudioUpdate(AudioEmitType.Fall, true);
+                _airTime = 0f;
+            } else if (!IsGrounded)
+            {
+                _airTime += Time.deltaTime;
+            }
         }
 
         public void TryLean(int direction)
@@ -189,6 +197,7 @@ namespace TK_Shared._3DPlayerMovement
                 return;
 
             _verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * Physics.gravity.y * gravityScale);
+            AudioUpdate(AudioEmitType.Jump, true);
         }
 
         public void PickUp()
@@ -321,17 +330,37 @@ namespace TK_Shared._3DPlayerMovement
             }
         }
 
-        void AudioUpdate()
+        void AudioUpdate(AudioEmitType audioEmitType = AudioEmitType.Move, bool applyOnce = false)
         {
-            float movementVolumeMod = GetMovementVolume();
+            float movementVolumeMod = audioEmitType switch
+            {
+                AudioEmitType.Jump => jumpVolume,
+                AudioEmitType.Fall => groundHitVolume * Mathf.Clamp01(_airTime),
+                _ => GetMovementVolume()
+            };
+
+            // switch (audioEmitType)
+            // {
+            //     case AudioEmitType.Jump:
+            //         Debug.Log("Audio emit: jump");
+            //         break;
+            //     case AudioEmitType.Fall:
+            //         Debug.Log("Audio emit: fall");
+            //         break;
+            //     default:
+            //         Debug.Log("Audio emit: move");
+            //         break;
+            // }
+            
             if (movementVolumeMod < 0.01f) return;
             Collider[] colliders = Physics.OverlapSphere(transform.position, audioEmitRadius);
             foreach (Collider col in colliders)
             {
                 if (col.gameObject.layer == enemyLayerIndex && col.gameObject.GetComponent<AICore>() is { } aic)
                 {
-                    aic.HearingUpdate(movementVolumeMod * Time.deltaTime,
-                        Vector3.Distance(transform.position, col.gameObject.transform.position), audioEmitRadius * movementVolumeMod);
+                    aic.HearingUpdate(movementVolumeMod * (applyOnce ? 1: Time.deltaTime),
+                        Vector3.Distance(transform.position, col.gameObject.transform.position),
+                        audioEmitRadius * movementVolumeMod);
                 }
             }
         }
